@@ -1,0 +1,122 @@
+The below still does not collect:
+-walks (3 speeds)
+-run
+-grab(ed)/throw(n) animations
+-ledgewait and ledgejump
+-shieldbreak
+-specials
+-aerials (maybe hook into the fall animation code?)
+...possibly a few more
+
+@8008A3F8:
+
+lwz r4,20(r13)
+mr r5,r4
+cmpwi r5,0x1000
+bgt  DELIM
+blt ANIM
+
+/*if flag play the wait animation*/
+DELIM:
+subi r5,r4,0x1000
+stw r5,20(r13) /*store noflag*/
+li r4,0x68 /*force r4 to 0x68=Heavy ThrowF*/
+b END
+
+/*if noflag play the desired animation*/
+ANIM:
+addi r4,r4,1
+cmpwi r4,0x000D
+blt+ ANIM /*crashy death animations below 12*/
+/*walk and run dont work so good :(
+cmpwi r4,0x000F
+beq RUN
+cmpwi r4,0x0010
+beq RUN
+cmpwi r4,0x0011
+beq RUN
+cmpwi r4,0x0015
+beq RUN
+*/
+cmpwi r4,0x001B /*aerial animations above 27*/
+beq SKIP1
+cmpwi r4,0x0041 /*more aerial animations above 65*/
+beq SKIP2
+cmpwi r4,0x0054 /*more aerial animations/item animations above 75*/
+beq SKIP3
+cmpwi r4,0x00CD /*annoying furafura nonsense*/
+beq SKIP4
+cmpwi r4,0x00D4 /*grabs crash too*/
+beq SKIP5
+cmpwi r4,0x00EF /*grabs crash too*/
+beq SKIP6
+cmpwi r4,0x0104 /*tournament winners crash too*/
+beq SKIP7
+cmpwi r4,0x010A /*ShoulderedWait?*/
+beq SKIP8
+
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+RUN:
+lwz r5,60(r13)
+addi r5,r5,1
+stw r5,60(r13)
+cmpwi r5,16
+blt END
+addi r5,r4,0x1001
+stw r5,20(r13)
+li r5,0
+stw r5,60(r13)
+b END
+
+SKIP1:
+li r4,0x0026
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP2:
+li r4,0x0046
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP3:
+li r4,0x00B2
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP4:
+li r4,0x00D3
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP5:
+li r4,0x00E9
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP6:
+li r4,0x00F4
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP7:
+li r4,0x0108
+addi r5,r4,0x1000
+stw r5,20(r13) /*store flag*/
+b END
+
+SKIP8:
+li r4,0x0E
+stw r4,20(r13) /*store noflag*/
+b END
+
+END:
+li r5,0
